@@ -103,7 +103,9 @@ class FreezeActivity : Activity() {
         completeBtn.isAllCaps = false
         completeBtn.textSize = 18f
         completeBtn.setTextColor(Color.WHITE)
-        completeBtn.setOnClickListener { finishTask() }
+        completeBtn.setOnClickListener {
+            startActivity(Intent(this, VerifyActivity::class.java).putExtra("noteId", noteId))
+        }
         col.addView(completeBtn, LinearLayout.LayoutParams(-1, dp(62)).apply { topMargin = dp(24) })
 
         pinHint = LinearLayout(this)
@@ -178,9 +180,9 @@ class FreezeActivity : Activity() {
             progress.text = "Complete the task, then tap the button"
             ready = true
         }
-        completeBtn.isEnabled = ready
-        completeBtn.text = if (ready) "Task complete – unlock my phone" else "Tick every item to unlock"
-        completeBtn.background = roundBg(if (ready) 0xFF1E8E3E.toInt() else 0xFF9AA0A6.toInt(), dpf(31))
+        completeBtn.isEnabled = true
+        completeBtn.text = "📸  Verify with screenshot to unlock"
+        completeBtn.background = roundBg(0xFF1E8E3E.toInt(), dpf(31))
     }
 
     private fun finishTask() {
@@ -217,6 +219,13 @@ class FreezeActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        if (Prefs.lockedId(this) == 0L) {
+            // Task was verified: release the lock.
+            done = true
+            try { stopLockTask() } catch (_: Exception) {}
+            finish()
+            return
+        }
         if (::pinHint.isInitialized) {
             tryPin()
             h.postDelayed({ refreshHint() }, 800)
@@ -225,7 +234,7 @@ class FreezeActivity : Activity() {
 
     /** Soft lock: if the user leaves this screen (Home, recents, another app), bring it back. */
     private fun bringBack() {
-        if (!done && !isFinishing && Prefs.lockedId(this) != 0L) launch(this, noteId)
+        if (!done && !isFinishing && !VerifyActivity.active && Prefs.lockedId(this) != 0L) launch(this, noteId)
     }
 
     override fun onUserLeaveHint() {

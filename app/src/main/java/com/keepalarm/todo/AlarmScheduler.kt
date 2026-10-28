@@ -99,6 +99,36 @@ object AlarmLogic {
         return false
     }
 
+    /** Task proven done: stop the alarm, finish the task, unlock the screen. */
+    fun complete(c: Context, id: Long) {
+        AlarmService.stop(c)
+        val n = Repo.get(c, id)
+        if (n != null) {
+            n.snoozeCount = 0
+            if (n.repeat == 0) {
+                n.markDone()
+                advance(n)
+                Repo.put(c, n)
+                AlarmScheduler.cancel(c, n.id)
+            } else {
+                n.items.forEach { it.done = false }
+                n.completed = false
+                advance(n)
+                Repo.put(c, n)
+                AlarmScheduler.schedule(c, n)
+            }
+        }
+        if (Prefs.lockedId(c) == id) Prefs.setLocked(c, 0)
+    }
+
+    /** Verification failed: make sure the alarm is ringing again. */
+    fun ringAgain(c: Context, id: Long) {
+        if (AlarmService.ringingId == id) return
+        try {
+            c.startForegroundService(Intent(c, AlarmService::class.java).putExtra("noteId", id))
+        } catch (_: Exception) {}
+    }
+
     fun dismiss(c: Context, id: Long) {
         AlarmService.stop(c)
         val n = Repo.get(c, id) ?: return

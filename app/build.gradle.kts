@@ -15,6 +15,15 @@ android {
         versionName = "1.0"
     }
 
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -29,5 +38,10 @@ android {
     }
 }
 
-// No third-party libraries on purpose: the app uses only the Android framework,
+dependencies {
+    // On-device text recognition (model bundled, works offline) for screenshot verification.
+    implementation("com.google.mlkit:text-recognition:16.0.1")
+}
+
+// Only ML Kit is used as a library; the rest is the Android framework: the app uses only the Android framework,
 // which keeps the build simple and avoids dependency problems.

@@ -141,14 +141,13 @@ class AlarmActivity : Activity() {
         col.addView(snooze, LinearLayout.LayoutParams(-1, dp(60)).apply { bottomMargin = dp(12) })
 
         val dismiss = Button(this)
-        dismiss.text = "Dismiss"
+        dismiss.text = "✅  I did it – verify with screenshot"
         dismiss.isAllCaps = false
         dismiss.textSize = 20f
         dismiss.setTextColor(Color.WHITE)
         dismiss.background = roundBg(0xFF1E8E3E.toInt(), dpf(32))
         dismiss.setOnClickListener {
-            AlarmLogic.dismiss(this, noteId)
-            finish()
+            startActivity(android.content.Intent(this, VerifyActivity::class.java).putExtra("noteId", noteId))
         }
         col.addView(dismiss, LinearLayout.LayoutParams(-1, dp(64)))
 

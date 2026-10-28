@@ -135,6 +135,20 @@ class EditorActivity : Activity() {
         alarmRow.addView(clearBtn, LinearLayout.LayoutParams(0, -2, 1f))
         root.addView(alarmRow)
 
+        val verifyBtn = Button(this)
+        verifyBtn.text = "✅  Verify task with screenshot"
+        verifyBtn.isAllCaps = false
+        verifyBtn.textSize = 15f
+        verifyBtn.setOnClickListener {
+            save()
+            if (note.isEmpty()) {
+                toast(this, "Write the task first")
+            } else {
+                startActivity(android.content.Intent(this, VerifyActivity::class.java).putExtra("noteId", note.id))
+            }
+        }
+        root.addView(verifyBtn, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(6) })
+
         // colours
         val hs = HorizontalScrollView(this)
         hs.isHorizontalScrollBarEnabled = false

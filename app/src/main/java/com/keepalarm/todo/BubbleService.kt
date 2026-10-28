@@ -311,20 +311,28 @@ class BubbleService : Service() {
             return
         }
         for (n in tasks) {
-            val cb = CheckBox(this)
-            val sub = if (n.alarmAt > 0) "\n⏰ " + fmtTime(n.alarmAt) else ""
-            cb.text = n.displayTitle() + sub
-            cb.textSize = 15f
-            cb.setTextColor(0xFF202124.toInt())
-            cb.setOnCheckedChangeListener { _, checked ->
-                if (checked) {
-                    n.markDone()
-                    Repo.put(this, n)
-                    AlarmScheduler.cancel(this, n.id)
-                    h.postDelayed({ fillList(); tick() }, 350)
-                }
+            val row = LinearLayout(this)
+            row.orientation = LinearLayout.HORIZONTAL
+            row.gravity = Gravity.CENTER_VERTICAL
+            val t = TextView(this)
+            t.text = n.displayTitle() + (if (n.alarmAt > 0) "\n⏰ " + fmtTime(n.alarmAt) else "")
+            t.textSize = 15f
+            t.setTextColor(0xFF202124.toInt())
+            row.addView(t, LinearLayout.LayoutParams(0, -2, 1f))
+            val open = Button(this)
+            open.text = "Open"
+            open.isAllCaps = false
+            open.setOnClickListener {
+                hidePanel()
+                try {
+                    startActivity(
+                        Intent(this, EditorActivity::class.java)
+                            .putExtra("noteId", n.id).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    )
+                } catch (_: Exception) {}
             }
-            box.addView(cb)
+            row.addView(open)
+            box.addView(row)
         }
     }
 
